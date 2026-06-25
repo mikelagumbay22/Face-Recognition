@@ -78,15 +78,6 @@ st.set_page_config(page_title="Face Recognition", page_icon="📷", layout="wide
 st.title("Face Recognition")
 st.caption("Use your camera to scan a face and match it against known people.")
 
-face_recognition, import_error = load_face_recognition()
-if import_error:
-    st.error(
-        "Could not load `face_recognition`. On Streamlit Cloud, add `cmake` in "
-        "`packages.txt` and redeploy."
-    )
-    st.code(import_error)
-    st.stop()
-
 if not os.path.isdir(KNOWN_FACES_DIR):
     st.warning(f"`{KNOWN_FACES_DIR}/` folder not found. Add reference photos and redeploy.")
     st.stop()
@@ -98,12 +89,20 @@ if not known_images:
     st.warning(f"No photos found in `{KNOWN_FACES_DIR}/`. Add `.jpg` or `.png` files and redeploy.")
     st.stop()
 
-try:
-    data = load_face_database()
-except Exception as exc:
-    st.error("Could not build the face database from known_faces.")
-    st.code(str(exc))
-    st.stop()
+with st.spinner("Loading face recognition (first run can take a few seconds)..."):
+    face_recognition, import_error = load_face_recognition()
+    if import_error:
+        st.error("Could not load `face_recognition`.")
+        st.code(import_error)
+        st.info("Run locally: `pip install -r requirements.txt` then restart the app.")
+        st.stop()
+
+    try:
+        data = load_face_database()
+    except Exception as exc:
+        st.error("Could not build the face database from known_faces.")
+        st.code(str(exc))
+        st.stop()
 
 st.success(f"Loaded {len(data['names'])} known face(s): {', '.join(data['names'])}")
 
