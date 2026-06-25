@@ -3,5 +3,4 @@ venv/
 __pycache__/
 *.pyc
 *.pkl
-known_faces/
 .DS_Store
